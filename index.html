@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lumieree</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #f0ece4;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 24px 0;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f0ece4;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 60px 24px 20px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 8vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: #f0ece4;
+    }
+
+    .hero h1 span { color: #c9a97a; }
+
+    .social-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      padding: 48px 24px 0;
+    }
+
+    .social-icons { display: flex; gap: 20px; }
+
+    .social-icons a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #f0ece4;
+      text-decoration: none;
+      transition: border-color 0.3s, background 0.3s;
+      flex-shrink: 0;
+      overflow: visible;
+    }
+
+    .social-icons a:hover {
+      border-color: #c9a97a;
+      background: rgba(201,169,122,0.12);
+    }
+
+    .social-icons svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+      flex-shrink: 0;
+      display: block;
+      overflow: visible;
+    }
+
+    .exclusive-text { text-align: center; max-width: 480px; }
+
+    .exclusive-text p {
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #a89a88;
+      margin-bottom: 10px;
+    }
+
+    .exclusive-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      line-height: 1.3;
+      margin-bottom: 18px;
+    }
+
+    .fanvue-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 52px;
+      border: 1px solid #c9a97a;
+      border-radius: 4px;
+      color: #c9a97a;
+      text-decoration: none;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .fanvue-btn:hover { background: #c9a97a; color: #0d0d0d; }
+
+    /* ── GALLERY ── */
+    .gallery-section {
+      padding: 64px 0 80px;
+      position: relative;
+    }
+
+    /* Обгортка зі стрілками по боках */
+    .gallery-outer {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .gallery-arrow {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #f0ece4;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.3s, background 0.3s;
+      z-index: 2;
+      margin: 0 10px;
+    }
+
+    .gallery-arrow:hover {
+      border-color: #c9a97a;
+      background: rgba(201,169,122,0.12);
+    }
+
+    .gallery-track-wrapper {
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .gallery-track {
+      display: flex;
+      gap: 16px;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+      cursor: grab;
+    }
+
+    .gallery-track.dragging {
+      cursor: grabbing;
+      transition: none;
+    }
+
+    .gallery-slide {
+      flex: 0 0 calc(33.333% - 11px);
+      min-width: 280px;
+      aspect-ratio: 3/4;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1a1a1a;
+      cursor: pointer;
+    }
+
+    .gallery-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+      pointer-events: none;
+    }
+
+    .gallery-slide:hover img { transform: scale(1.04); }
+
+    .gallery-slide .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3a3a3a;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 6px;
+      user-select: none;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: #f0ece4;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .lightbox-close:hover { opacity: 1; }
+
+    .lightbox-prev, .lightbox-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #f0ece4;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .lightbox-prev { left: 20px; }
+    .lightbox-next { right: 20px; }
+
+    .lightbox-prev:hover, .lightbox-next:hover {
+      border-color: #c9a97a;
+      background: rgba(201,169,122,0.12);
+    }
+
+    @media (max-width: 680px) {
+      .gallery-slide { flex: 0 0 80vw; }
+      .gallery-arrow { margin: 0 4px; width: 36px; height: 36px; font-size: 0.9rem; }
+      .lightbox-prev { left: 8px; }
+      .lightbox-next { right: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Lumieree</div>
+  </header>
+
+  <section class="hero">
+    <h1>Hey, I'm <span>Lumieree</span></h1>
+  </section>
+
+  <section class="social-section">
+
+    <div class="social-icons">
+
+      <!-- Instagram -->
+      <a href="https://instagram.com/lumieree404" target="_blank" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.055 1.805.249 2.227.415.56.217.96.477 1.382.896.42.42.68.822.896 1.382.166.422.36 1.057.413 2.227.058 1.265.07 1.645.07 4.849s-.012 3.584-.07 4.849c-.054 1.17-.247 1.805-.413 2.227-.217.56-.477.96-.896 1.382-.42.42-.822.68-1.382.896-.422.166-1.057.36-2.227.413-1.265.058-1.645.07-4.849.07s-3.584-.012-4.849-.07c-1.17-.054-1.805-.247-2.227-.413a3.697 3.697 0 0 1-1.382-.896 3.697 3.697 0 0 1-.896-1.382c-.166-.422-.36-1.057-.413-2.227C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.849c.054-1.17.247-1.805.413-2.227.217-.56.477-.96.896-1.382a3.697 3.697 0 0 1 1.382-.896c.422-.166 1.057-.36 2.227-.413C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.333.013 7.053.072 5.775.131 4.902.333 4.14.63a5.862 5.862 0 0 0-2.126 1.384A5.862 5.862 0 0 0 .63 4.14C.333 4.902.131 5.775.072 7.053.013 8.333 0 8.741 0 12c0 3.259.013 3.668.072 4.948.059 1.277.261 2.15.558 2.913a5.862 5.862 0 0 0 1.384 2.126 5.862 5.862 0 0 0 2.126 1.384c.763.297 1.636.499 2.913.558C8.333 23.987 8.741 24 12 24c3.259 0 3.668-.013 4.948-.072 1.277-.059 2.15-.261 2.913-.558a5.862 5.862 0 0 0 2.126-1.384 5.862 5.862 0 0 0 1.384-2.126c.297-.763.499-1.636.558-2.913.059-1.28.072-1.689.072-4.948 0-3.259-.013-3.667-.072-4.947-.059-1.278-.261-2.151-.558-2.914a5.862 5.862 0 0 0-1.384-2.126A5.862 5.862 0 0 0 19.86.63C19.098.333 18.225.131 16.948.072 15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+        </svg>
+      </a>
+
+      <!-- TikTok -->
+      <a href="https://tiktok.com/@lumieree404" target="_blank" aria-label="TikTok">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.95a8.23 8.23 0 0 0 4.81 1.53V7.04a4.85 4.85 0 0 1-1.04-.35z"/>
+        </svg>
+      </a>
+
+      <!-- Telegram -->
+      <a href="https://t.me/+qdL2Ys8JXTk5MGQy" target="_blank" aria-label="Telegram">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
+      </a>
+
+    </div>
+
+    <div class="exclusive-text">
+      <p>Exclusive content</p>
+      <h2>Only on Fanvue ✦</h2>
+      <a class="fanvue-btn" href="https://fanvue.com/YOUR_PROFILE" target="_blank">
+        ✦ &nbsp;Subscribe on Fanvue
+      </a>
+    </div>
+
+  </section>
+
+  <section class="gallery-section">
+    <div class="gallery-outer">
+
+      <button class="gallery-arrow" id="prev" aria-label="Previous">&#8592;</button>
+
+      <div class="gallery-track-wrapper">
+        <div class="gallery-track" id="track">
+
+          <div class="gallery-slide"><img src="hf_20260608_163257_e56a48ec-7178-4cc2-962d-4d4e294155b6.png" alt="Photo 1" onerror="this.parentNode.innerHTML='<div class=placeholder>PHOTO 1</div>'"></div>
+          <div class="gallery-slide"><img src="hf_20260610_181518_25d71c3a-0a3a-405c-b31e-e8cb9a76123a (2).png" alt="Photo 2" onerror="this.parentNode.innerHTML='<div class=placeholder>PHOTO 2</div>'"></div>
+          <div class="gallery-slide"><img src="hf_20260608_160715_99c84607-f9af-4ed0-a111-d42f703b1932.png" alt="Photo 3" onerror="this.parentNode.innerHTML='<div class=placeholder>PHOTO 3</div>'"></div>
+          <div class="gallery-slide"><img src="hf_20260602_162254_1b8ac495-19e1-4e06-a660-3266dafa76bb (3).jpg" alt="Photo 4" onerror="this.parentNode.innerHTML='<div class=placeholder>PHOTO 4</div>'"></div>
+          <div class="gallery-slide"><img src="hf_20260605_185140_93cae4ec-9174-4731-a06a-de58f1178312 (2).jpg" alt="Photo 5" onerror="this.parentNode.innerHTML='<div class=placeholder>PHOTO 5</div>'"></div>
+          <div class="gallery-slide"><img src="hf_20260607_130938_8724106b-a048-4a40-abac-49eed8d07400 (2).png" alt="Photo 6" onerror="this.parentNode.innerHTML='<div class=placeholder>PHOTO 6</div>'"></div>
+
+        </div>
+      </div>
+
+      <button class="gallery-arrow" id="next" aria-label="Next">&#8594;</button>
+
+    </div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lbClose">&#215;</button>
+    <button class="lightbox-prev" id="lbPrev">&#8592;</button>
+    <img id="lbImg" src="" alt=""/>
+    <button class="lightbox-next" id="lbNext">&#8594;</button>
+  </div>
+
+  <script>
+    const track = document.getElementById('track');
+    const slides = track.querySelectorAll('.gallery-slide');
+    let index = 0;
+    let startX = 0;
+    let isDragging = false;
+    let dragMoved = false;
+
+    function getVisible() {
+      return window.innerWidth <= 680 ? 1 : 3;
+    }
+
+    function maxIndex() {
+      return Math.max(0, slides.length - getVisible());
+    }
+
+    function update() {
+      const slideWidth = slides[0].offsetWidth + 16;
+      track.style.transform = `translateX(-${index * slideWidth}px)`;
+    }
+
+    document.getElementById('next').addEventListener('click', () => {
+      index = index >= maxIndex() ? 0 : index + 1;
+      update();
+    });
+
+    document.getElementById('prev').addEventListener('click', () => {
+      index = index <= 0 ? maxIndex() : index - 1;
+      update();
+    });
+
+    // Touch
+    track.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      dragMoved = false;
+    }, { passive: true });
+
+    track.addEventListener('touchmove', () => { dragMoved = true; }, { passive: true });
+
+    track.addEventListener('touchend', e => {
+      const diff = startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        index = diff > 0
+          ? (index >= maxIndex() ? 0 : index + 1)
+          : (index <= 0 ? maxIndex() : index - 1);
+        update();
+      }
+    }, { passive: true });
+
+    // Mouse drag
+    track.addEventListener('mousedown', e => {
+      isDragging = true;
+      dragMoved = false;
+      startX = e.clientX;
+      track.classList.add('dragging');
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      if (Math.abs(e.clientX - startX) > 5) dragMoved = true;
+    });
+
+    window.addEventListener('mouseup', e => {
+      if (!isDragging) return;
+      isDragging = false;
+      track.classList.remove('dragging');
+      const diff = startX - e.clientX;
+      if (Math.abs(diff) > 50) {
+        index = diff > 0
+          ? (index >= maxIndex() ? 0 : index + 1)
+          : (index <= 0 ? maxIndex() : index - 1);
+        update();
+      }
+    });
+
+    window.addEventListener('mouseleave', () => {
+      isDragging = false;
+      track.classList.remove('dragging');
+    });
+
+    window.addEventListener('resize', update);
+
+    // ── LIGHTBOX ──
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    let lbIndex = 0;
+
+    const imgSrcs = Array.from(slides).map(s => {
+      const img = s.querySelector('img');
+      return img ? img.src : null;
+    }).filter(Boolean);
+
+    function openLightbox(i) {
+      lbIndex = i;
+      lbImg.src = imgSrcs[lbIndex];
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    slides.forEach((slide, i) => {
+      slide.addEventListener('click', () => {
+        if (dragMoved) return;
+        if (slide.querySelector('img')) openLightbox(i);
+      });
+    });
+
+    document.getElementById('lbClose').addEventListener('click', closeLightbox);
+
+    document.getElementById('lbNext').addEventListener('click', () => {
+      lbIndex = lbIndex >= imgSrcs.length - 1 ? 0 : lbIndex + 1;
+      lbImg.src = imgSrcs[lbIndex];
+    });
+
+    document.getElementById('lbPrev').addEventListener('click', () => {
+      lbIndex = lbIndex <= 0 ? imgSrcs.length - 1 : lbIndex - 1;
+      lbImg.src = imgSrcs[lbIndex];
+    });
+
+    lightbox.addEventListener('click', e => {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') document.getElementById('lbNext').click();
+      if (e.key === 'ArrowLeft') document.getElementById('lbPrev').click();
+    });
+  </script>
+
+</body>
+</html>
